@@ -61,13 +61,12 @@ export default {
   data() {
     return {
       title: '행운의 돌림판',
-      items: [
-        { name: '피자', count: 5, probability: 16.7, color: '#45ace9' },
-        { name: '치킨', count: 10, probability: 33.3, color: '#b8d766' },
-        { name: '탕수육', count: 4, probability: 13.3, color: '#ff9f43' },
-        { name: '짜장면', count: 5, probability: 16.7, color: '#778ca3' },
-        { name: '족발', count: 4, probability: 13.3, color: '#a55eea' },
-        { name: '햄버거', count: 2, probability: 6.7, color: '#0abde3' }
+      items: JSON.parse(localStorage.getItem('wheelItems')) || [
+        { name: '피자', count: 4, probability: 15.4, color: '#45ace9' },
+        { name: '치킨', count: 10, probability: 38.5, color: '#b8d766' },
+        { name: '탕수육', count: 4, probability: 15.4, color: '#ff9f43' },
+        { name: '짜장면', count: 4, probability: 15.4, color: '#778ca3' },
+        { name: '족발', count: 4, probability: 15.4, color: '#a55eea' }
       ],
       rotation: 0,
       isSpinning: false,
@@ -104,10 +103,12 @@ export default {
     updateItemCount({ index, change }) {
       this.items[index].count += change;
       this.recalculateProbabilities();
+      this.saveItemsToLocalStorage();
     },
     deleteItem(index) {
       this.items.splice(index, 1);
       this.recalculateProbabilities();
+      this.saveItemsToLocalStorage();
     },
     getRandomColor() {
       const colors = ['#45ace9', '#b8d766', '#ff9f43', '#778ca3', '#a55eea', '#0abde3', '#eb4d4b', '#20bf6b'];
@@ -176,9 +177,13 @@ export default {
       
       // 확률 재계산
       this.recalculateProbabilities();
-      
+
+      this.saveItemsToLocalStorage();
       // 폼 닫기
       this.showItemForm = false;
+    },
+    saveItemsToLocalStorage() {
+      localStorage.setItem('wheelItems', JSON.stringify(this.items));
     },
     recalculateProbabilities() {
       const totalCount = this.items.reduce((sum, item) => sum + item.count, 0);
@@ -186,6 +191,12 @@ export default {
       this.items.forEach(item => {
         item.probability = parseFloat(((item.count / totalCount) * 100).toFixed(1));
       });
+      this.saveItemsToLocalStorage();
+    }
+  },
+  mounted() {
+    if (!localStorage.getItem('wheelItems')) {
+      this.saveItemsToLocalStorage();
     }
   }
 }
